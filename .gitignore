@@ -1,0 +1,8 @@
+*.pyc
+*.mp3
+*.wav
+./pythonAudio/*.pyc
+./makeTensorPickle/*.pyc
+./makeTensorPickle/*.mp3
+./makeTensorPickle/*.wav
+
