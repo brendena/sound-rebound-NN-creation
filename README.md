@@ -11,7 +11,9 @@ model = DNN(network, tensorboard_verbose=3)
 
 Run network and then type in
 
-`tensorboard --logdir='/tmp/tflearn_logs'` 
+```shell
+tensorboard --logdir='/tmp/tflearn_logs'
+``` 
 
 
 
