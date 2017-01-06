@@ -4,8 +4,11 @@ This is all the code to construct the neural net more the raspberry pi.  This wi
 build a graph of the neural network using TensorBoard which is a part of tensorflow.
 
 Place this where you defined your model.  tensorboard_verbose= 3 is the highest level of visualization.
+
 'model = DNN(network, tensorboard_verbose=3)'
+
 Run network and then type in
+
 '''
 tensorboard --logdir='/tmp/tflearn_logs' 
 '''
