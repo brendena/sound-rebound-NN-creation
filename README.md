@@ -1,7 +1,7 @@
 # sound-rebound-NN-creation #
 This is all the code to construct the neural net more the raspberry pi.  This will most likely converge with [matrix-creator](https://github.com/brendena/sound-rebound-matrix-creator) latter down the road once there more intergrated.  
 
-### visuals
+### Visuals
 To build a graph of the neural network using TensorBoard which is a part of tensorflow.
 
 Place this where you defined your model.  tensorboard_verbose= 3 is the highest level of visualization.
