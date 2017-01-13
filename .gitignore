@@ -8,6 +8,7 @@
 ./audioPickleCreator/*.pyc
 ./audioPickleCreator/*.mp3
 ./audioPickleCreator/*.wav
+./audioPickleCreator/*.pickle
 ./NeuralNetwork/*.pyc
 ./NeuralNetwork/*.pickle
 
