@@ -9,7 +9,7 @@ import numpy as np
 
 import pickle
 import numpy as np
-data = pickle.load( open( "./audioForNeuralNet.pickle", "rb" ) )
+data = pickle.load( open( "./audioForNeuralNetwork.pickle", "rb" ) )
 
 def to1hot(row):
     one_hot = np.zeros(2)

@@ -8,23 +8,20 @@
 # convert .m4a to wave
 # http://superuser.com/questions/23930/how-to-decode-aac-m4a-audio-files-into-wav
 
-for file in *.m4a; do
-    
-    if [ "$file" != '*.m4a' ]; then
-	
-    
-	
-	filename="${file%.*}"
-	wavextension=".wav"
-	filename=$filename$wavextension
-	echo "converting " $file
-	echo $filename
-	#avconv -i   "$file"  "$filename"
-	faad -o    "$filename" "$file" 
-	#chmod 777 fingerSnapping.wav
-	#rm $file
-    fi
-done
+#for file in *.m4a; do
+#    
+#    if [ "$file" != '*.m4a' ]; then
+#	filename="${file%.*}"
+#	wavextension=".wav"
+#	filename=$filename$wavextension
+#	echo "converting " $file
+#	echo $filename
+#	#avconv -i   "$file"  "$filename"
+#	faad -o    "$filename" "$file" 
+#	#chmod 777 fingerSnapping.wav
+#	#rm $file
+#    fi
+#done
 
 audioFileName="audioForNeuralNetwork"
 

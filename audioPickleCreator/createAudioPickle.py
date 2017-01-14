@@ -7,7 +7,7 @@ import pandas as pd
 import random
 import sys
 
-limit = 70
+limit = 100
 
 # 0 means crying 1 mean not crying
 y0, sr0 = librosa.core.load("./babyCrying.wav",44100, duration=limit)
