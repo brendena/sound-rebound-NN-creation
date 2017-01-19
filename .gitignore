@@ -11,4 +11,4 @@
 ./audioPickleCreator/*.pickle
 ./NeuralNetwork/*.pyc
 NeuralNetwork/*.pickle
-
+./NeuralNetwork/*model*
