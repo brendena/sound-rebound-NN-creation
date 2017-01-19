@@ -21,29 +21,17 @@ data["one_hot_encoding"] = data.target.apply(to1hot)
 data["mfcc_flatten"] = data.mfcc.apply(lambda mfcc: mfcc.flatten())
 
 
-train_data = data[0:160]
+
 test_data = data[160:]
-
-X = np.vstack(train_data.mfcc_flatten).reshape(train_data.shape[0],20, 87,1).astype(np.float32)
-Y = np.vstack(train_data["one_hot_encoding"])
-
 testX = np.vstack(test_data.mfcc_flatten).reshape(test_data.shape[0],20, 87,1).astype(np.float32)
 testY = np.vstack(test_data["one_hot_encoding"])
 
 n_nodes_hl1 = 1500
 n_nodes_hl2 = 1500
-n_nodes_hl3 = 1500
 
 n_classes = 2
 batch_size = 20
 hm_epochs = 10
-
-
-
-
-
-
-
 
 
 
@@ -81,3 +69,7 @@ model.load('my_model.model')
 print( np.round(model.predict([testX[1]])[0]) )
 print(testY[1])
 
+for i in range(10):
+	print("guess " + str(i))
+	print( np.array_str(testY[i]) + "  realValue" )
+	print( np.round(model.predict([testX[i]])[0])  )

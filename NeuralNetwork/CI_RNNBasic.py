@@ -25,9 +25,10 @@ class MusicData:
 
 
 
-
-		train_data = data[0:160]
-		test_data = data[160:]
+		length = len(data["mfcc_flatten"])
+		trainingSection = length * .20
+		train_data = data[0:int(length - trainingSection)]
+		test_data = data[int(length - trainingSection):]
 
 		X = np.vstack(train_data.mfcc_flatten).reshape(train_data.shape[0],20, 87).astype(np.float32)
 		Y = np.vstack(train_data["one_hot_encoding"])

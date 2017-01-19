@@ -10,12 +10,12 @@ Place this where you defined your model.  tensorboard_verbose= 3 is the highest 
 model = DNN(network, tensorboard_verbose=3)
 ```
 
-Run network and then type in
+Run network and then type in terminal
 
 ```shell
 tensorboard --logdir='/tmp/tflearn_logs'
 ``` 
-
+Then it will spin up a server with the performace of the neural network.
 
 
 ## Resources and References
