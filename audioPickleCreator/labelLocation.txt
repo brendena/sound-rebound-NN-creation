@@ -1,0 +1,3 @@
+babyCrying 1
+babyLaughing 2
+fingerSnapping 3
