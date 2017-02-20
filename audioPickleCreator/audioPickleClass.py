@@ -80,32 +80,34 @@ class audioPickleClass:
 		mypath = self.getCurrentDirectory()
 		mypath = mypath + "/labels"
 
-		labelsDir = listdir(mypath)
-		listFilesDir = listdir(mypath + "/" + labelsDir[2])
-
-		'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		get the files that have a unique file name.
-		By file name i mean the file name with
-		a extension
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-		uniqueFileName = []
-
-		def append_IfNotIn(value, array):
-			a = os.path.splitext(value)[0]
-
-			if(a not in array):
-				array.append(a)
-		[append_IfNotIn(x, uniqueFileName) for x in listFilesDir]
-
-		'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		Append all the files with both
-		a label and a wav files.
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 		audioFilesWithExtensions = []
-		for fNameWE in uniqueFileName:
-			if(fNameWE + ".txt" in listFilesDir):
-				if(fNameWE + ".wav" in listFilesDir):
-					audioFilesWithExtensions.append({"dir":labelsDir[2], "fileName":fNameWE })
+		labelsDir = listdir(mypath)
+		for labelDir in labelsDir:
+			listFilesDir = listdir(mypath + "/" + labelDir)
+			
+			'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			get the files that have a unique file name.
+			By file name i mean the file name with
+			a extension
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+			uniqueFileName = []
+
+			def append_IfNotIn(value, array):
+				a = os.path.splitext(value)[0]
+
+				if(a not in array):
+					array.append(a)
+			[append_IfNotIn(x, uniqueFileName) for x in listFilesDir]
+
+			'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+			Append all the files with both
+			a label and a wav files.
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+			
+			for fNameWE in uniqueFileName:
+				if(fNameWE + ".txt" in listFilesDir):
+					if(fNameWE + ".wav" in listFilesDir):
+						audioFilesWithExtensions.append({"dir":labelDir, "fileName":fNameWE })
 		return audioFilesWithExtensions
 
 
@@ -155,11 +157,12 @@ class audioPickleClass:
 				#then converts it back to a list
 				#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 				splittingPoints.append( list(map(float, line.split("\t")[0:2] )))
+		f.close()
 		return splittingPoints
 
 	def addMusic(self,audioFile, labelsArray, target):
-		limit = 100
-		y0, sr0 = librosa.core.load(audioFile,44100, duration=limit)
+		#limit = 100 , duration=limit
+		y0, sr0 = librosa.core.load(audioFile,44100)
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		# number of data points you want per second.
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -171,7 +174,7 @@ class audioPickleClass:
 		for label in labelsArray:
 			#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 			#labels can be less then zero which will break
-			# this program.this forces it to be at least zero.
+			# this program.this forces it to be at least zero
 			#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 			if(label[0] < 0):
 				start = 0
@@ -199,6 +202,7 @@ class audioPickleClass:
 					'data': ySample,
 					'target': target
 						})
+						
 					
 	
 	def shuffle(self):
