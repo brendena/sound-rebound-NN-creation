@@ -223,7 +223,7 @@ class audioPickleClass:
 			tmpArray["mel"].append(tmp["mel"])
 			tmpArray["data"].append(tmp["data"])
 			tmpArray["target"].append(tmp["target"])
-		
+		'''
 		junk2 = {		
 			'mfcc'   : pd.Series(tmpArray['mfcc']),
     		'target' : pd.Series(tmpArray['target'])
@@ -233,5 +233,5 @@ class audioPickleClass:
 	        'mfcc'   : junk2['mfcc'],
 	        'target' : junk2['target'],
 	    })
-
-		pickle.dump(dataframe, open(FilePickle + ".pickle", "wb"))
+		'''
+		pickle.dump(tmpArray, open(FilePickle + ".pickle", "wb"))
