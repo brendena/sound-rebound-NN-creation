@@ -64,12 +64,12 @@ class ClassifyingClass:
 
     def cross_val(self):
         for clf, label in zip([self.clf1, self.clf2, self.clf3, self.eclfSoft], [self.clf1Type, self.clf2Type, self.clf3Type,"soft voiting"]):
-            #scores = cross_validation.cross_val_score(clf, self.X, self.Y, cv=2, scoring='wrong_choice')
-            #print("Accuracy: %0.2f (+/- %0.2f) [%s]" % (scores.mean(), scores.std(), label))
+            scores = cross_validation.cross_val_score(clf, self.X, self.Y, cv=2)
+            print("Accuracy: %0.2f (+/- %0.2f) [%s]" % (scores.mean(), scores.std(), label))
             #print(cross_val_score(clf,self.X,self.Y))
             #print(cross_val_score(clf,self.X,self.Y, scoring='wrong_choice'))
-            self.test(clf,label)
-        plt.show()
+            #self.test(clf,label)
+        #plt.show()
 
     def predict(self, data, all = False):
         #cross val predict
@@ -93,9 +93,9 @@ class ClassifyingClass:
 
             classifier.fit(X_train, y_train)
             cf = confusion_matrix(y_test, classifier.predict(X_test))
-            alist = ["a","b"]
+            alist = ["cryingBaby","laughingBaby"]
             plt.figure()
-            self.plot_confusion_matrix(cf,alist,label)
+            self.plot_confusion_matrix(cf,alist,title=label)
             
 
     def plot_confusion_matrix(self,cm, classes,

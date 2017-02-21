@@ -3,11 +3,11 @@ from audioPickleClass import audioPickleClass
 from classifyingClass import ClassifyingClass
 import numpy as np
 import pickle
-'''
+#'''
 APC = audioPickleClass()
 #print(APC.getListAudioFileWithLabels())
 APC.addLabels()
-APC.shuffle()
+#PC.shuffle()
 APC.createPickle("test")
 #'''
 
