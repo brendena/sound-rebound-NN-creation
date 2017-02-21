@@ -5,6 +5,7 @@
 *.mp3
 *.wav
 *.ipynb
+*.pickle
 ./audioPickleCreator/*.pyc
 ./audioPickleCreator/*.mp3
 ./audioPickleCreator/*.wav
