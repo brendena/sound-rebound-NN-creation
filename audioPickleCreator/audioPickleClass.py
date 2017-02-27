@@ -2,8 +2,7 @@ import librosa
 import pickle
 from random import shuffle
 import pandas as pd
-import os
-from os import listdir
+import LabelClass
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #
@@ -31,85 +30,20 @@ class audioPickleClass:
 
 	def __init__(self):
 		self.listAudioObject = []
-		self.labelLocations = self._getLabelLocations()
-
-	'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-	#~~~~~~~~~~~~~~~definition~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#	grabs the elements from labelLocations
-	#   and create a dictionary, out of them.
-	#   This is usefull because you give this
-	#   the parents directory of a audio file
-	#   and it will give you a cordisponding
-	#   label for it. 
-	'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-	def _getLabelLocations(self):
-		labelLocationFile =  "labelLocation.txt"
-		f = open(  labelLocationFile, 'r')
-		labelLocation = {}
-		for line in f:
-			seperatedLine  = line.replace("\n", '').split(" ")    
-			labelLocation[seperatedLine[0]] = int(seperatedLine[1])
-		print(labelLocation)
-		f.close()
-		return labelLocation 
-		 
+		'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+		#   It works because of
+		#	http://stackoverflow.com/questions/5514573/python-error-typeerror-module-object-is-not-callable-for-headfirst-python-co
+		'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+		self.labelClass = LabelClass.LabelClass()
+		self.labelLocations = self.labelClass._getLabelLocations()
 
 
-	def getCurrentDirectory(self):
-		return os.path.dirname(os.path.abspath(__file__))
+	
+	def loadAudioPickledClass(self):
+		self.labelLocations = pickle.load( open( "./test.pickle", "rb" ) )
 
 
-	'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-	#~~~~~~~~~~~~~~~definition~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#	loop through all file in the labels and is going to
-	#   look for all the wave files with a corisponding
-	#   label file.
-	#	ex.
-	#		[
-	#			{"dir": "babyCrying",
-	#			 "fileName": "babyCrying2" --stripped of file extensions
-	#			}
-	#		]
-	'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-	def getListAudioFileWithLabels(self):
-		'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-		get home directoy and then labels
-		directory.  Then grabs all the directores
-		from it.
-		%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-		mypath = self.getCurrentDirectory()
-		mypath = mypath + "/labels"
-
-		audioFilesWithExtensions = []
-		labelsDir = listdir(mypath)
-		for labelDir in labelsDir:
-			listFilesDir = listdir(mypath + "/" + labelDir)
-			
-			'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-			get the files that have a unique file name.
-			By file name i mean the file name with
-			a extension
-			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-			uniqueFileName = []
-
-			def append_IfNotIn(value, array):
-				a = os.path.splitext(value)[0]
-
-				if(a not in array):
-					array.append(a)
-			[append_IfNotIn(x, uniqueFileName) for x in listFilesDir]
-
-			'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-			Append all the files with both
-			a label and a wav files.
-			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-			
-			for fNameWE in uniqueFileName:
-				if(fNameWE + ".txt" in listFilesDir):
-					if(fNameWE + ".wav" in listFilesDir):
-						audioFilesWithExtensions.append({"dir":labelDir, "fileName":fNameWE })
-		return audioFilesWithExtensions
-
+	
 
 
 	'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
@@ -119,7 +53,7 @@ class audioPickleClass:
 	#   latter on.
 	'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 	def addLabels(self,labels=[]):
-		fileLocationsWithLabels = self.getListAudioFileWithLabels()
+		fileLocationsWithLabels = self.labelClass.getListAudioFileWithLabels()
 		if(len(labels) != 0 ):
 			for label in range(len(fileLocationsWithLabels)-1,-1,-1):
 				if(fileLocationsWithLabels[i]["dir"] not in self.labelLocations):
@@ -162,15 +96,20 @@ class audioPickleClass:
 
 	def addMusic(self,audioFile, labelsArray, target):
 		#limit = 100 , duration=limit
-		y0, sr0 = librosa.core.load(audioFile,44100)
+		y0, sr0 = librosa.core.load(audioFile,44100, mono=True)#converts to singal to mono
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		# number of data points you want per second.
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		numberPointsPerSecond = 2 
+		numberPointsPerSecond = 1 #50ms
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		# samplePerSecond/numberPointsPerSecond
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		lengthDataPoint = sr0 *(1/numberPointsPerSecond)
+		lengthDataPoint = sr0 * float(1/numberPointsPerSecond)
+		#print("length data points ")
+		#print(lengthDataPoint)
+		#print(sr0)
+		#print(len(y0))
+		#print(y0)
 		for label in labelsArray:
 			#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 			#labels can be less then zero which will break
@@ -181,28 +120,68 @@ class audioPickleClass:
 			else:
 				start = round(label[0])
 			end = round(label[1])
-			for i in range(start, end+1):  
+
+			for i in range(start, end+1): 
 				secondStartingPoint = i*sr0         
 				'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 				this splits each second into
 				multiple data points.  This is based off
 				the amount of numberPointsPerSecond.
 				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+				mfccs = []
+				melSpec = []
+				data = []
+				zcr = []
+				rms = []
+
+				
 				for section in range(0,numberPointsPerSecond):
-
 					startingPoint = int(secondStartingPoint + (section * lengthDataPoint))
-					endingPoint = int(secondStartingPoint + (section * lengthDataPoint + 1))		
+					endingPoint = int(secondStartingPoint + ((section + 1) * lengthDataPoint))
 					ySample = y0[startingPoint: endingPoint]
-					mfccs = librosa.feature.mfcc(y=ySample, sr=sr0)
-					melSpec = librosa.feature.melspectrogram(y=ySample, sr=sr0)
+					data.append(ySample)
+					mfccs.append(librosa.feature.mfcc(y=ySample, sr=sr0))
+					melSpec.append(librosa.feature.melspectrogram(y=ySample, sr=sr0))
+					#zcr.append(self.zero_crossing_rate_BruteForce(ySample))
+					#rms.append(self.root_mean_square(ySample))
+					
+					
 
-					self.listAudioObject.append({
+				self.listAudioObject.append({
 					'mfcc' : mfccs,
 					'mel': melSpec,
-					'data': ySample,
+					'data': data,
+					'zcr' : zcr,
+					'rms' : rms,
 					'target': target
-						})
-						
+				})
+				break
+
+	def zero_crossing_rate_BruteForce(self,wavedata):
+
+		zero_crossings = 0
+
+		for i in range(1, len(wavedata)):
+
+			if ( wavedata[i - 1] <  0 and wavedata[i] >  0 ) or \
+				( wavedata[i - 1] >  0 and wavedata[i] <  0 ) or \
+				( wavedata[i - 1] != 0 and wavedata[i] == 0):
+
+				zero_crossings += 1
+
+		zero_crossing_rate = zero_crossings / float(len(wavedata) - 1)
+
+		return zero_crossing_rate	
+
+	def root_mean_square(self,wavedata):
+
+		# how many blocks have to be processed?
+		num_blocks = 1
+
+		rms_seg = np.sqrt(np.mean(wavedata**2))
+			
+
+		return rms_seg
 					
 	
 	def shuffle(self):
@@ -223,15 +202,5 @@ class audioPickleClass:
 			tmpArray["mel"].append(tmp["mel"])
 			tmpArray["data"].append(tmp["data"])
 			tmpArray["target"].append(tmp["target"])
-		'''
-		junk2 = {		
-			'mfcc'   : pd.Series(tmpArray['mfcc']),
-    		'target' : pd.Series(tmpArray['target'])
-		}
 
-		dataframe = pd.DataFrame({
-	        'mfcc'   : junk2['mfcc'],
-	        'target' : junk2['target'],
-	    })
-		'''
 		pickle.dump(tmpArray, open(FilePickle + ".pickle", "wb"))

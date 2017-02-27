@@ -4,6 +4,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import OneClassSVM 
 from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw
 import numpy as np
@@ -130,3 +131,32 @@ class ClassifyingClass:
         plt.tight_layout()
         plt.ylabel('True label')
         plt.xlabel('Predicted label')
+
+    ''' 
+        ensmble
+    '''
+    def one_class_svm(self):
+        #passdef
+        #OneClassSvm
+        clf = OneClassSVM()
+        
+        firstPosition = 0; 
+        for i in range(0, len(self.Y)):
+            if(self.Y[i] == 2):
+                firstPosition = i
+                break
+        laughingBaby = self.X[0 : firstPosition - 1]
+        cryingBaby = self.X[firstPosition + 1 : -1]
+
+        clf.fit(laughingBaby)
+        falseValue = 0
+        trueValue = 0
+
+  
+        outcome = clf.predict(laughingBaby)
+        print(outcome[outcome == -1].size)
+        print(outcome[outcome == 1].size)
+        
+
+
+

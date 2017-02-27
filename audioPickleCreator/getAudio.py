@@ -3,6 +3,8 @@ going to convert getAUdio.sh to py
 '''
 
 from subprocess import call
+import numpy as np
+import librosa
 import json
 import re
 f = open("audioLocation.json")
@@ -30,7 +32,9 @@ for video in a["fileLocations"]:
 	
 	dirLocation = "labels/" + re.sub(r'\d+', '', video[0])
 	waveFile = video[0] + ".wav"
-	call(["mv",waveFile, dirLocation + "/"+waveFile])
 
+	y0, sr0 = librosa.core.load(audioFile,44100)
+	
+	call(["mv",waveFile, dirLocation + "/"+waveFile])
 
 
