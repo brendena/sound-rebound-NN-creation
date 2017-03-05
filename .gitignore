@@ -1,11 +1,10 @@
 .*
-!/.gitignore
-
 *.pyc
 *.mp3
 *.wav
 *.ipynb
 *.pickle
+test.pickle
 ./audioPickleCreator/*.pyc
 ./audioPickleCreator/*.mp3
 ./audioPickleCreator/*.wav

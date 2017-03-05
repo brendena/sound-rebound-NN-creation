@@ -97,93 +97,105 @@ class audioPickleClass:
 	def addMusic(self,audioFile, labelsArray, target):
 		#limit = 100 , duration=limit
 		y0, sr0 = librosa.core.load(audioFile,44100, mono=True)#converts to singal to mono
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		# number of data points you want per second.
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		numberPointsPerSecond = 1 #50ms
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		# samplePerSecond/numberPointsPerSecond
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		lengthDataPoint = sr0 * float(1/numberPointsPerSecond)
-		#print("length data points ")
-		#print(lengthDataPoint)
-		#print(sr0)
-		#print(len(y0))
-		#print(y0)
+
+
+		'''~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		/	Section - is the data point
+		/	
+		/	Frame - is the amount of 
+		/				hopLenght you want to take
+		/
+		/	hopLength - is the length of 
+		/					time for each mesurment.
+		~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+		numberFramePerSection = 2
+		hopLength = (int(44100/16))
+		print(len(y0))
+		print(len(y0)/ sr0)
 		for label in labelsArray:
+
 			#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 			#labels can be less then zero which will break
 			# this program.this forces it to be at least zero
 			#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 			if(label[0] < 0):
-				start = 0
-			else:
-				start = round(label[0])
-			end = round(label[1])
-
-			for i in range(start, end+1): 
-				secondStartingPoint = i*sr0         
-				'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-				this splits each second into
-				multiple data points.  This is based off
-				the amount of numberPointsPerSecond.
-				%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-				mfccs = []
-				melSpec = []
-				data = []
-				zcr = []
-				rms = []
-
+				label[0] = 0
 				
-				for section in range(0,numberPointsPerSecond):
-					startingPoint = int(secondStartingPoint + (section * lengthDataPoint))
-					endingPoint = int(secondStartingPoint + ((section + 1) * lengthDataPoint))
-					ySample = y0[startingPoint: endingPoint]
-					data.append(ySample)
-					mfccs.append(librosa.feature.mfcc(y=ySample, sr=sr0))
-					melSpec.append(librosa.feature.melspectrogram(y=ySample, sr=sr0))
-					#zcr.append(self.zero_crossing_rate_BruteForce(ySample))
-					#rms.append(self.root_mean_square(ySample))
-					
-					
 
-				self.listAudioObject.append({
-					'mfcc' : mfccs,
-					'mel': melSpec,
-					'data': data,
-					'zcr' : zcr,
-					'rms' : rms,
-					'target': target
-				})
-				break
+			start = round(label[0] * sr0)
+			end = round(label[1] * sr0)
 
-	def zero_crossing_rate_BruteForce(self,wavedata):
 
-		zero_crossings = 0
+			
+			ySample = y0[start: end]
+			#data = ySample
+			mfccs = librosa.feature.mfcc(y=ySample, sr=sr0,hop_length=hopLength,n_mfcc=20)
+			melSpec  = librosa.feature.melspectrogram(y=ySample, sr=sr0,hop_length=hopLength,n_mels=128)
+			rms = librosa.feature.rmse(y=y0,hop_length=hopLength)
+			zcr = librosa.feature.zero_crossing_rate(y=y0,hop_length=hopLength)
 
-		for i in range(1, len(wavedata)):
-
-			if ( wavedata[i - 1] <  0 and wavedata[i] >  0 ) or \
-				( wavedata[i - 1] >  0 and wavedata[i] <  0 ) or \
-				( wavedata[i - 1] != 0 and wavedata[i] == 0):
-
-				zero_crossings += 1
-
-		zero_crossing_rate = zero_crossings / float(len(wavedata) - 1)
-
-		return zero_crossing_rate	
-
-	def root_mean_square(self,wavedata):
-
-		# how many blocks have to be processed?
-		num_blocks = 1
-
-		rms_seg = np.sqrt(np.mean(wavedata**2))
 			
 
-		return rms_seg
-					
-	
+			
+			'''~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+			/	numberSections forces it to only chuck up the data
+			/	to the point where you have a full set.  that 
+			/   whats what the int() for.
+			~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+			numberSections = int(len(mfccs[0]) / numberFramePerSection)
+
+			mfccs = self.segmentData3d(mfccs,numberFramePerSection,numberSections)
+			melSpec = self.segmentData3d(melSpec,numberFramePerSection,numberSections)
+			rms = self.segmentData3d(rms,numberFramePerSection,numberSections)
+			zcr = self.segmentData3d(zcr,numberFramePerSection,numberSections)
+			
+			for i in range(0, numberSections):
+				#'''
+				data= []
+				self.listAudioObject.append({
+					'mfcc' : mfccs[i],
+					'mel': melSpec[i],
+					'data': data,
+					'zcr' : zcr[i],
+					'rms' : rms[i],
+					'target': target
+				})
+				#'''
+			break
+
+
+
+	'''
+		dataStartAs
+		2d array
+		mfccs[numberOfMFCCS] = 
+						array[len(ySample) / hopLength]
+
+		DataEnds
+		3d array
+		allData[numberSections] = 
+						mfccs[numberOfMFCCS] = 
+								array[hopLength * numberFramePerSection]
+	'''
+	def segmentData3d(self,data,numberFramePerSection,numberSections):
+		allData = []
+		for sectionNum in range(0,numberSections):
+				newArray = []
+				for frame in data:
+					currentFrameNumber = sectionNum*numberFramePerSection
+					newArray.append((list(frame[currentFrameNumber:(sectionNum+1)*numberFramePerSection])))
+				allData.append(newArray)
+		#print(len(allData))
+		return allData
+
+	def secgmentData2d(self,data, numberFramePerSection,numberSections):
+		allData = []
+		for sectionNum in range(0,numberSections):
+			allData.append(list(data[sectionNum*numberFramePerSection:(sectionNum+1)*numberFramePerSection]))
+
+		#print(len(allData))
+		return allData
+
 	def shuffle(self):
 		shuffle(self.listAudioObject)
 
@@ -192,6 +204,8 @@ class audioPickleClass:
 			'mfcc' : [],
 			'mel': [],
 			'data': [],
+			'zcr': [],
+			'rms': [],
 			'target': []
 		}
 		print("lens of list Audio Object")
@@ -201,6 +215,7 @@ class audioPickleClass:
 			tmpArray["mfcc"].append(tmp["mfcc"])
 			tmpArray["mel"].append(tmp["mel"])
 			tmpArray["data"].append(tmp["data"])
+			tmpArray["zcr"].append(tmp["zcr"])
+			tmpArray["rms"].append(tmp["rms"])
 			tmpArray["target"].append(tmp["target"])
-
 		pickle.dump(tmpArray, open(FilePickle + ".pickle", "wb"))

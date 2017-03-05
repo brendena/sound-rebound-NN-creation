@@ -1,13 +1,49 @@
 import librosa
+import pandas as pd
+
+hopLength = (int(44100/8))
+
+types = ['mfcc','mel','zcr','rms']
+'''
+loops through these
+numberFramePerSection
+hopLength
+'''
+
+#'''
+APC = audioPickleClass()
+#print(APC.getListAudioFileWithLabels())
+APC.addLabels()
+#PC.shuffle()
+APC.createPickle("test")
+#'''
 
 
-y0, sr0 = librosa.core.load("fingerSnapping.wav",44100, mono=True,duration = 5, offset=10)
-
-asdf = librosa.feature.mfcc(y=y0, sr=sr0,n_mfcc=40)
-print(len(asdf))
-
-print(len(asdf[0]))
-#print(asdf[0])
-print(asdf[1][0:10])
 
 
+data = pickle.load( open( "./test.pickle", "rb" ) )
+
+
+
+#'''
+final = []
+for dataPoint in data["rms"]:
+	asdf = []
+	for i in dataPoint:
+		#asdf.extend((x for sublist in i for x in sublist))
+		asdf.extend((x for x in i))	
+	final.append(asdf)
+
+		
+
+print(len(final))
+print(len(final[0]))
+print(final[0][0])
+#'''
+
+#'''
+CC = ClassifyingClass()
+CC.setData(final, data["target"])
+CC.one_class_svm()
+CC.cross_val()
+#'''
