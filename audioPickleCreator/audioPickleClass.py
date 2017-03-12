@@ -28,7 +28,7 @@ import LabelClass
 
 class audioPickleClass:
 
-	def __init__(self):
+	def __init__(self,numberFramePerSection=1,hopLengthPerSecond=16):
 		self.listAudioObject = []
 		'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 		#   It works because of
@@ -36,13 +36,8 @@ class audioPickleClass:
 		'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 		self.labelClass = LabelClass.LabelClass()
 		self.labelLocations = self.labelClass._getLabelLocations()
-
-
-	
-	def loadAudioPickledClass(self):
-		self.labelLocations = pickle.load( open( "./test.pickle", "rb" ) )
-
-
+		self.numberFramePerSection = numberFramePerSection
+		self.hopLengthPerSecond = hopLengthPerSecond
 	
 
 
@@ -94,6 +89,8 @@ class audioPickleClass:
 		f.close()
 		return splittingPoints
 
+
+
 	def addMusic(self,audioFile, labelsArray, target):
 		#limit = 100 , duration=limit
 		y0, sr0 = librosa.core.load(audioFile,44100, mono=True)#converts to singal to mono
@@ -108,8 +105,8 @@ class audioPickleClass:
 		/	hopLength - is the length of 
 		/					time for each mesurment.
 		~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
-		numberFramePerSection = 2
-		hopLength = (int(44100/16))
+		numberFramePerSection = self.numberFramePerSection
+		hopLength = (int(44100/self.hopLengthPerSecond))
 		print(len(y0))
 		print(len(y0)/ sr0)
 		for label in labelsArray:
@@ -122,19 +119,18 @@ class audioPickleClass:
 				label[0] = 0
 				
 
+
+
 			start = round(label[0] * sr0)
 			end = round(label[1] * sr0)
-
 
 			
 			ySample = y0[start: end]
 			#data = ySample
 			mfccs = librosa.feature.mfcc(y=ySample, sr=sr0,hop_length=hopLength,n_mfcc=20)
 			melSpec  = librosa.feature.melspectrogram(y=ySample, sr=sr0,hop_length=hopLength,n_mels=128)
-			rms = librosa.feature.rmse(y=y0,hop_length=hopLength)
-			zcr = librosa.feature.zero_crossing_rate(y=y0,hop_length=hopLength)
-
-			
+			rms = librosa.feature.rmse(y=ySample,hop_length=hopLength)
+			zcr = librosa.feature.zero_crossing_rate(y=ySample,hop_length=hopLength)
 
 			
 			'''~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,27 +152,26 @@ class audioPickleClass:
 					'mfcc' : mfccs[i],
 					'mel': melSpec[i],
 					'data': data,
-					'zcr' : zcr[i],
 					'rms' : rms[i],
+					'zcr' : zcr[i],
 					'target': target
 				})
 				#'''
-			break
 
 
 
-	'''
-		dataStartAs
-		2d array
-		mfccs[numberOfMFCCS] = 
-						array[len(ySample) / hopLength]
-
-		DataEnds
-		3d array
-		allData[numberSections] = 
-						mfccs[numberOfMFCCS] = 
-								array[hopLength * numberFramePerSection]
-	'''
+	'''~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	/	dataStartAs
+	/	2d array
+	/	mfccs[numberOfMFCCS] = 
+	/					array[len(ySample) / hopLength]
+	/
+	/	DataEnds
+	/	3d array
+	/	allData[numberSections] = 
+	/					mfccs[numberOfMFCCS] = 
+	/							array[hopLength * numberFramePerSection]
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
 	def segmentData3d(self,data,numberFramePerSection,numberSections):
 		allData = []
 		for sectionNum in range(0,numberSections):
@@ -188,7 +183,7 @@ class audioPickleClass:
 		#print(len(allData))
 		return allData
 
-	def secgmentData2d(self,data, numberFramePerSection,numberSections):
+	def segmentData2d(self,data, numberFramePerSection,numberSections):
 		allData = []
 		for sectionNum in range(0,numberSections):
 			allData.append(list(data[sectionNum*numberFramePerSection:(sectionNum+1)*numberFramePerSection]))

@@ -3,10 +3,10 @@ from audioPickleClass import audioPickleClass
 from classifyingClass import ClassifyingClass
 import pickle
 #'''
-APC = audioPickleClass()
+APC = audioPickleClass(2,2)
 #print(APC.getListAudioFileWithLabels())
 APC.addLabels()
-#PC.shuffle()
+APC.shuffle()
 APC.createPickle("test")
 #'''
 
@@ -16,11 +16,10 @@ APC.createPickle("test")
 data = pickle.load( open( "./test.pickle", "rb" ) )
 
 
-
 #'''
 
 final = []
-for dataPoint in data["mfcc"]:
+for dataPoint in data["mel"]:
 	asdf = []
 	for i in dataPoint:
 		#asdf.extend((x for sublist in i for x in sublist))
@@ -29,14 +28,16 @@ for dataPoint in data["mfcc"]:
 
 		
 
-print(len(final))
-print(len(final[0]))
-print(final[0][0])
+#print(len(final))
+#print(len(final[0]))
+#print(final[0][0])
 #'''
 
 #'''
 CC = ClassifyingClass()
 CC.setData(final, data["target"])
-CC.one_class_svm()
+#CC.one_class_svm()
 CC.cross_val()
+#CC.getArrayOfLabelData()
+#CC.saveClassifier()
 #'''

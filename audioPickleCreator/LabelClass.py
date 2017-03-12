@@ -1,5 +1,6 @@
 import os
 from os import listdir
+import json
 
 class LabelClass:
 
@@ -17,15 +18,13 @@ class LabelClass:
 	#   label for it. 
 	'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 	def _getLabelLocations(self):
-		labelLocationFile =  "labelLocation.txt"
-		f = open(  labelLocationFile, 'r')
-		labelLocation = {}
-		for line in f:
-			seperatedLine  = line.replace("\n", '').split(" ")    
-			labelLocation[seperatedLine[0]] = int(seperatedLine[1])
-		print(labelLocation)
-		f.close()
-		return labelLocation 
+		labelLocationFile =  "audioLocation.json"
+
+		data = []
+		with open(labelLocationFile) as f:
+		    data = json.load(f)
+
+		return data['labelLocation'] 
 
 
 	def getCurrentDirectory(self):
@@ -82,3 +81,7 @@ class LabelClass:
 					if(fNameWE + ".wav" in listFilesDir):
 						audioFilesWithExtensions.append({"dir":labelDir, "fileName":fNameWE })
 		return audioFilesWithExtensions
+
+
+
+		
